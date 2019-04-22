@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 func main() {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", home).Methods("GET")
 	r.HandleFunc("/protected", protected).Methods("GET")
 
 	var port = ":6000"
@@ -21,10 +21,23 @@ func main() {
 	log.Fatal(http.ListenAndServe(port, handlers.LoggingHandler(os.Stdout, r)))
 }
 
-var home = func(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<h1>Sanity</h1>")
-}
-
 var protected = func(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(posts)
+}
+
+type User struct {
+	ID                              int
+	Name, Email, Username, Password string
+}
+
+type Post struct {
+	ID       int    `json:"id"`
+	Username string `json:"Username"`
+	Caption  string `json:"Caption"`
+}
+
+var posts = []Post{
+	Post{ID: 1, Username: "test123", Caption: "Apples"},
+	Post{ID: 2, Username: "test123", Caption: "Oranges"},
 }
